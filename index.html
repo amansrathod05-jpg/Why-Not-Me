@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Surreal Dreamscape</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      overflow: hidden;
+      height: 100vh;
+      height: 100dvh;
+      width: 100vw;
+      background: #030303;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* ── Atmospheric Background ── */
+    .atmosphere {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 30%, rgba(180, 60, 30, 0.15) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 50% 60%, rgba(120, 40, 80, 0.1) 0%, transparent 60%),
+        radial-gradient(ellipse 100% 80% at 50% 50%, rgba(20, 10, 30, 0.8) 0%, #030303 100%);
+    }
+
+    /* ── Floating Particles ── */
+    .particles {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 180, 100, 0.8), rgba(255, 120, 50, 0.2));
+      animation: float-up linear infinite;
+      opacity: 0;
+    }
+
+    @keyframes float-up {
+      0% {
+        opacity: 0;
+        transform: translateY(100vh) translateX(0) scale(0);
+      }
+      10% {
+        opacity: 1;
+        transform: translateY(90vh) translateX(5px) scale(1);
+      }
+      90% {
+        opacity: 0.6;
+        transform: translateY(10vh) translateX(-5px) scale(0.8);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-5vh) translateX(0) scale(0);
+      }
+    }
+
+    /* ── Image Container ── */
+    .image-wrapper {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .image-frame {
+      position: relative;
+      max-width: 100%;
+      max-height: 100%;
+      line-height: 0;
+    }
+
+    .image-frame::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 16px;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 140, 50, 0.5),
+        rgba(180, 40, 80, 0.3),
+        rgba(100, 60, 180, 0.3),
+        rgba(255, 140, 50, 0.5)
+      );
+      background-size: 300% 300%;
+      animation: border-glow 6s ease infinite;
+      z-index: -1;
+      filter: blur(8px);
+      opacity: 0.7;
+    }
+
+    .image-frame::after {
+      content: '';
+      position: absolute;
+      inset: -20px;
+      border-radius: 24px;
+      background: radial-gradient(ellipse at center, rgba(200, 80, 40, 0.15), transparent 70%);
+      z-index: -2;
+      animation: pulse-glow 4s ease-in-out infinite;
+    }
+
+    @keyframes border-glow {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.02); }
+    }
+
+    .image-frame img {
+      display: block;
+      max-width: 100%;
+      max-height: calc(100vh - 32px);
+      max-height: calc(100dvh - 32px);
+      width: auto;
+      height: auto;
+      border-radius: 12px;
+      object-fit: contain;
+    }
+
+    /* ── Vignette Overlay ── */
+    .vignette {
+      position: fixed;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      background: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 50%, rgba(3, 3, 3, 0.6) 100%);
+    }
+
+    /* ── Top/Bottom Fades ── */
+    .fade-top {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      z-index: 4;
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(3, 3, 3, 0.5), transparent);
+    }
+
+    .fade-bottom {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      z-index: 4;
+      pointer-events: none;
+      background: linear-gradient(to top, rgba(3, 3, 3, 0.5), transparent);
+    }
+
+    /* ── Audio Controls ── */
+    .audio-control {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 10;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(10, 10, 10, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: scale(0.8);
+    }
+
+    .audio-control.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .audio-control:hover {
+      border-color: rgba(255, 140, 50, 0.5);
+      background: rgba(255, 140, 50, 0.1);
+      transform: scale(1.1);
+    }
+
+    .audio-control svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.7);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* ── Sound Wave Indicator ── */
+    .sound-waves {
+      position: fixed;
+      bottom: 76px;
+      right: 20px;
+      z-index: 10;
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 20px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .sound-waves.active {
+      opacity: 1;
+    }
+
+    .sound-wave-bar {
+      width: 3px;
+      border-radius: 2px;
+      background: linear-gradient(to top, rgba(255, 140, 50, 0.8), rgba(255, 200, 100, 0.4));
+      animation: wave 1.2s ease-in-out infinite;
+    }
+
+    .sound-wave-bar:nth-child(1) { height: 8px; animation-delay: 0s; }
+    .sound-wave-bar:nth-child(2) { height: 14px; animation-delay: 0.15s; }
+    .sound-wave-bar:nth-child(3) { height: 10px; animation-delay: 0.3s; }
+    .sound-wave-bar:nth-child(4) { height: 18px; animation-delay: 0.45s; }
+    .sound-wave-bar:nth-child(5) { height: 6px; animation-delay: 0.6s; }
+
+    @keyframes wave {
+      0%, 100% { transform: scaleY(0.4); }
+      50% { transform: scaleY(1); }
+    }
+
+    /* ── Tap Overlay (only if autoplay blocked) ── */
+    .tap-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(3, 3, 3, 0.4);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      cursor: pointer;
+      animation: overlay-fade-in 0.8s ease forwards;
+    }
+
+    .tap-overlay.show {
+      display: flex;
+    }
+
+    @keyframes overlay-fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .tap-hint {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      animation: tap-pulse 2s ease-in-out infinite;
+    }
+
+    .tap-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 180, 100, 0.4);
+      background: rgba(255, 140, 50, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tap-icon svg {
+      width: 28px;
+      height: 28px;
+      fill: none;
+      stroke: rgba(255, 200, 150, 0.8);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .tap-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.5);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    @keyframes tap-pulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 1; }
+    }
+
+    /* ── Corner Decorations ── */
+    .corner-deco {
+      position: fixed;
+      z-index: 5;
+      width: 40px;
+      height: 40px;
+      pointer-events: none;
+      opacity: 0.2;
+    }
+
+    .corner-deco::before,
+    .corner-deco::after {
+      content: '';
+      position: absolute;
+      background: linear-gradient(135deg, rgba(255, 140, 50, 0.6), transparent);
+    }
+
+    .corner-tl { top: 16px; left: 16px; }
+    .corner-tl::before { top: 0; left: 0; width: 20px; height: 1px; }
+    .corner-tl::after { top: 0; left: 0; width: 1px; height: 20px; }
+
+    .corner-tr { top: 16px; right: 16px; }
+    .corner-tr::before { top: 0; right: 0; width: 20px; height: 1px; }
+    .corner-tr::after { top: 0; right: 0; width: 1px; height: 20px; }
+
+    .corner-bl { bottom: 16px; left: 16px; }
+    .corner-bl::before { bottom: 0; left: 0; width: 20px; height: 1px; }
+    .corner-bl::after { bottom: 0; left: 0; width: 1px; height: 20px; }
+
+    .corner-br { bottom: 16px; right: 16px; }
+    .corner-br::before { bottom: 0; right: 0; width: 20px; height: 1px; }
+    .corner-br::after { bottom: 0; right: 0; width: 1px; height: 20px; }
+
+    /* ── Scan Line Effect ── */
+    .scanline {
+      position: fixed;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px,
+        rgba(0, 0, 0, 0.03) 4px
+      );
+    }
+
+    /* ── Loading State ── */
+    .loader {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #030303;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+    }
+
+    .loader.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loader-ring {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.05);
+      border-top-color: rgba(255, 140, 50, 0.6);
+      animation: spin 1s linear infinite;
+    }
+
+    .loader-text {
+      margin-top: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.3);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="loader" id="loader">
+    <div class="loader-ring"></div>
+    <div class="loader-text">Loading dreamscape...</div>
+  </div>
+
+  <div class="atmosphere"></div>
+
+  <div class="particles" id="particles"></div>
+
+  <div class="image-wrapper">
+    <div class="image-frame">
+      <img
+        id="mainImage"
+        src="https://z-cdn-media.chatglm.cn/files/3f2c201d-9ff7-4b54-a253-29f141d2c108.jpeg?auth_key=1882488135-6606a7826ac746afb7cb49f69393a518-0-5d036291b77516ec7ddda0ba155bbe15"
+        alt="Surreal Dreamscape"
+        draggable="false"
+      />
+    </div>
+  </div>
+
+  <div class="vignette"></div>
+  <div class="fade-top"></div>
+  <div class="fade-bottom"></div>
+  <div class="scanline"></div>
+
+  <div class="corner-deco corner-tl"></div>
+  <div class="corner-deco corner-tr"></div>
+  <div class="corner-deco corner-bl"></div>
+  <div class="corner-deco corner-br"></div>
+
+  <div class="sound-waves" id="soundWaves">
+    <div class="sound-wave-bar"></div>
+    <div class="sound-wave-bar"></div>
+    <div class="sound-wave-bar"></div>
+    <div class="sound-wave-bar"></div>
+    <div class="sound-wave-bar"></div>
+  </div>
+
+  <button class="audio-control" id="audioBtn" title="Toggle Sound">
+    <svg id="iconOn" viewBox="0 0 24 24">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+    </svg>
+    <svg id="iconOff" viewBox="0 0 24 24" style="display:none;">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+      <line x1="23" y1="9" x2="17" y2="15"></line>
+      <line x1="17" y1="9" x2="23" y2="15"></line>
+    </svg>
+  </button>
+
+  <div class="tap-overlay" id="tapOverlay">
+    <div class="tap-hint">
+      <div class="tap-icon">
+        <svg viewBox="0 0 24 24">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+        </svg>
+      </div>
+      <span class="tap-text">Tap to play</span>
+    </div>
+  </div>
+
+  <audio id="bgMusic" loop preload="auto">
+    <source src="I%20Think%20They%20Call%20This%20Love.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    // ── Generate Floating Particles ──
+    (function createParticles() {
+      const container = document.getElementById('particles');
+      const count = window.innerWidth < 768 ? 15 : 30;
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        const size = Math.random() * 3 + 1;
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.animationDuration = (Math.random() * 12 + 8) + 's';
+        p.style.animationDelay = (Math.random() * 10) + 's';
+        container.appendChild(p);
+      }
+    })();
+
+    // ── Image Load → Hide Loader ──
+    const mainImage = document.getElementById('mainImage');
+    const loader = document.getElementById('loader');
+
+    if (mainImage.complete && mainImage.naturalHeight > 0) {
+      setTimeout(() => loader.classList.add('hidden'), 400);
+    } else {
+      mainImage.addEventListener('load', () => {
+        setTimeout(() => loader.classList.add('hidden'), 400);
+      });
+      mainImage.addEventListener('error', () => {
+        loader.classList.add('hidden');
+      });
+    }
+
+    // Fallback: hide loader after 5s max
+    setTimeout(() => loader.classList.add('hidden'), 5000);
+
+    // ── Audio Auto-Play Logic ──
+    const audio = document.getElementById('bgMusic');
+    const audioBtn = document.getElementById('audioBtn');
+    const iconOn = document.getElementById('iconOn');
+    const iconOff = document.getElementById('iconOff');
+    const soundWaves = document.getElementById('soundWaves');
+    const tapOverlay = document.getElementById('tapOverlay');
+    let isPlaying = false;
+    let userInteracted = false;
+
+    function setPlayingUI(playing) {
+      isPlaying = playing;
+      if (playing) {
+        iconOn.style.display = 'block';
+        iconOff.style.display = 'none';
+        soundWaves.classList.add('active');
+      } else {
+        iconOn.style.display = 'none';
+        iconOff.style.display = 'block';
+        soundWaves.classList.remove('active');
+      }
+      audioBtn.classList.add('visible');
+    }
+
+    function tryAutoPlay() {
+      audio.volume = 0.6;
+      const promise = audio.play();
+      if (promise !== undefined) {
+        promise.then(() => {
+          setPlayingUI(true);
+        }).catch(() => {
+          // Autoplay blocked — show tap overlay
+          tapOverlay.classList.add('show');
+          audioBtn.classList.add('visible');
+          setPlayingUI(false);
+        });
+      }
+    }
+
+    // Attempt autoplay when page loads
+    window.addEventListener('load', () => {
+      setTimeout(tryAutoPlay, 600);
+    });
+
+    // Tap overlay → start music
+    tapOverlay.addEventListener('click', () => {
+      tapOverlay.classList.remove('show');
+      audio.volume = 0.6;
+      audio.play().then(() => {
+        setPlayingUI(true);
+      }).catch(() => {
+        setPlayingUI(false);
+      });
+    });
+
+    // Mute/Unmute button
+    audioBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (isPlaying) {
+        audio.pause();
+        setPlayingUI(false);
+      } else {
+        audio.play().then(() => {
+          setPlayingUI(true);
+        }).catch(() => {});
+      }
+    });
+
+    // If user clicks anywhere (backup for autoplay)
+    document.addEventListener('click', () => {
+      if (!userInteracted && !isPlaying) {
+        userInteracted = true;
+        tapOverlay.classList.remove('show');
+        audio.play().then(() => {
+          setPlayingUI(true);
+        }).catch(() => {});
+      }
+    }, { once: true });
+  </script>
+
+</body>
+</html>
